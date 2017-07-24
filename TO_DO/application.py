@@ -1,15 +1,10 @@
-from flask import Flask
-from Database import db_session
-from Views import *
+from views import *
 
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db_session.remove()
+application = Flask(__name__)
 
-app = Flask(__name__)
 
-UsersView.register(app)
-TasksView.register(app)
+UsersView.register(application)
+TasksView.register(application)
 
 if __name__ == '__main__':
-    app.run()
+    application.run()
