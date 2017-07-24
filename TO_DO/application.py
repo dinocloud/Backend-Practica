@@ -1,10 +1,10 @@
 from views import *
+from database import create_app
+app = create_app()
 
-application = Flask(__name__)
 
-
-UsersView.register(application)
-TasksView.register(application)
+UsersView.register(app)
+TasksView.register(app)
 
 if __name__ == '__main__':
-    application.run()
+    app.run()

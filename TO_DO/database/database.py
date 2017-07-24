@@ -1,7 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
-from .. import application
 
+application = Flask(__name__)
 
 db = SQLAlchemy()
-# application.config.from_object(DBSettings)
-db.init_app(application)
+
+def create_app():
+    # application.config.from_object(DBSettings)
+    global db
+    db = SQLAlchemy()
+    db.init_app(application)
+    return application
