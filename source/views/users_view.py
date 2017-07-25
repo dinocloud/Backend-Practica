@@ -12,11 +12,18 @@ class UsersView(FlaskView):
         return jsonify({'user': User.query.get(id_user)})
 
     def post(self):
-        if not request.json or not 'username' in request.json:
+        data = request.json
+        username = data.get('username', None)
+        if not username:
             return 400
-        usr = User(request.json.username, request.json.get('password', ''))
-        db.session.add(usr)
-        db.session.commit()
+        password = data.get('password', None)
+        usr = User(username, password)
+        try:
+            db.session.add(usr)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return 409
         return jsonify({'user': usr}), 201
 
 

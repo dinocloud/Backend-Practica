@@ -1,5 +1,5 @@
 from views import *
-from database import create_app
+from database import create_app, db
 
 
 app = create_app()
