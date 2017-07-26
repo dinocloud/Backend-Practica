@@ -26,8 +26,8 @@ node {
 
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
-            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}="devops_file"'
-            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}="devops_file"'
+            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}:"devops_file"'
+            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}:"devops_file"'
         }
 
      stage ('Clean local memory')
