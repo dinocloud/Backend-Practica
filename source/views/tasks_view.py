@@ -1,36 +1,56 @@
 from flask_classy import FlaskView
 from flask import Flask, jsonify, request
 from models import *
+from schemas import *
 
 
 class TasksView(FlaskView):
+    task_schema = TaskSchema()
 
     def index(self):
-        return jsonify({'tasks': Task.query.all()})
+        tasks = Task.query.all()
+        tasks_data = self.task_schema.dump(tasks, many=True).data
+        return jsonify({'task': tasks_data}), 200
 
     def get(self, id_task):
-        return jsonify({'task': Task.query.get(id_task)})
+        task = Task.query.filter_by(id_task=int(id_task)).first()
+        task_data = self.task_schema.dump(task).data
+        return jsonify({'task': task_data})
 
     def post(self):
-        if not request.json or not 'task_name' in request.json:
+        data = request.json
+        task_name = data.get('task_name', None)
+        if not task_name:
             return 400
-        tsk = Task(request.json.task_name, request.json.get('task_description', ''),
-                   request.json.get('date_created', ''))
-        db.session.add(tsk)
-        db.session.commit()
-        return jsonify({'user': tsk}), 201
+        task_description = data.get('task_description', None)
+        tsk = Task(task_name=task_name, task_description=task_description)
+        try:
+            db.session.add(tsk)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return 409
+        # task = Task.query.filter_by(name=tsk.task.task_name).first()
+        task_data = self.task_schema.dump(tsk).data
+        return jsonify({'task': task_data}), 201
 
 
     def put(self, id_task):
-        tsk = User.query.get(id_task)
-        tsk.task_name = request.json.get('task_name', tsk.name)
-        tsk.task_description = request.json.get('task_description', tsk.task_description)
-        tsk.date_created = request.json.get('date_created', tsk.date_created)
-        db.session.commit()
-        return jsonify({'task': tsk})
+        data = request.json
+        task = Task.query.filter_by(id_task=int(id_task)).first()
+        task.task_name = data.get('task_name', None)
+        task.task_description = data.get('task_description', None)
+        try:
+            db.session.merge(task)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return 409
+        task_data = self.task_schema.dump(task).data
+        return jsonify({'task': task_data})
 
 
     def delete(self, id_task):
-        db.session.delete(User.query.get(id_task))
+        db.session.delete(Task.query.get(id_task))
         db.session.commit()
         return jsonify({'result': True})
