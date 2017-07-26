@@ -32,7 +32,7 @@ node {
 
      stage ('Clean local memory')
         {
-            sh 'docker rmi dinocloud/backend-practica:${BUIL_NUMBER}'
+            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
         }
 
 
