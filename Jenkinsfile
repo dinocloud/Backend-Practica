@@ -1,6 +1,8 @@
+String dockerTag = null
+
 node {
 
-    def dockerTag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+    dockerTag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
     stage('Checkout')
     {
