@@ -26,13 +26,13 @@ node {
 
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
-            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}:"devops_file"'
-            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") -${BUILD_NUMBER}:"devops_file"'
+            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
+            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
         }
 
      stage ('Clean local memory')
         {
-            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}'
+            sh 'docker rmi dinocloud/backend-practica:${BUIL_NUMBER}'
         }
 
 
