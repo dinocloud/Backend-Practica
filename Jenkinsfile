@@ -32,7 +32,7 @@ node {
 
      stage ('Clean local memory')
         {
-            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}''
+            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}'
         }
 
 
