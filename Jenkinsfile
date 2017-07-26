@@ -2,7 +2,7 @@ node {
 
     stage('Checkout')
     {
-        checkout([$class: 'GitSCM', branches: [[name: '*']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/dinocloud/Backend-Practica']]])
+        checkout scm
     }
 
     stage('Build image')
