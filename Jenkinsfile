@@ -36,7 +36,7 @@ node {
 
      stage ('Clean local memory')
         {
-            sh "docker rmi $(docker images -f \"reference=dinocloud/backend-practica:$dockerTag\" -q)"
+            sh "docker rmi \docker images -f \"reference=dinocloud/backend-practica:$dockerTag\" -q)"
         }
 
 
