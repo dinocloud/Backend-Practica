@@ -25,10 +25,16 @@ node {
          * Pushing multiple tags is cheap, as all the layers are reused. */
 
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-            sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS}"
-            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")'
-            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")'
+            sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
+            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") --currentBuild.name=devopsfile_'
+            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g") --currentBuild.name=devopsfile_'
         }
+
+     stage ('Clean local memory')
+        {
+            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}''
+        }
+
 
     }
 
