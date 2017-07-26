@@ -1,5 +1,7 @@
 node {
 
+    def dockerTag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+
     stage('Checkout')
     {
         checkout scm
@@ -26,13 +28,13 @@ node {
 
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
-            sh 'docker tag backend-practica dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
-            sh 'docker push dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
+            sh 'docker tag backend-practica dinocloud/backend-practica:${dockerTag}'
+            sh 'docker push dinocloud/backend-practica:${dockerTag}'
         }
 
      stage ('Clean local memory')
         {
-            sh 'docker rmi dinocloud/backend-practica:$(echo ${BRANCH_NAME}   | sed -e "s|origin/||g")-${BUILD_NUMBER}'
+            sh 'docker rmi $(docker images -f "reference=dinocloud/backend-practica:${dockerTag}" -q)'
         }
 
 
