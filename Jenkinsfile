@@ -27,20 +27,16 @@ node {
          * First, the incremental build number from Jenkins
          * Second, the 'latest' tag.
          * Pushing multiple tags is cheap, as all the layers are reused. */
-         step{
 
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
+             if (${BRANCH_NAME}=='master')
+             {
+                dockerTag = master-latest
+             }
             sh "docker tag backend-practica dinocloud/backend-practica:$dockerTag"
             sh "docker push dinocloud/backend-practica:$dockerTag"
-            }
-           step
-           {
-                if (${env.BRANCH_NAME}=='master')
-                {
-                   sh "docker tag backend-practica dinocloud/backend-practica:$dockerTag:latest"
-                }
-           }
+
 
     }
 
