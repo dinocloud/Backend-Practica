@@ -1,22 +1,23 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from database import db
+import datetime
 
 
 
 class Task(db.Model):
     __tablename__ = 'tasks'
     id_task = db.Column(Integer, primary_key=True)
-    task_name = db.Column(String(50), nullable=False)
-    task_description = db.Column(String(200))
+    task_name = db.Column(String(150), nullable=False)
+    task_description = db.Column(String(300))
     date_created = db.Column(DateTime, nullable=False)
     id_task_status = db.Column(Integer, ForeignKey('task_statuses.id_task_status'))
+    description = db.relationship('TaskStatus', backref=db.backref('task status per task'))
 
-    def __init__(self, id_task=None, task_name=None, task_description=None, date_created=None,
-                 id_task_status=None):
-        self.id_task = id_task
+    def __init__(self, task_name=None, task_description=None,
+                 id_task_status=1):
         self.task_name = task_name
         self.task_description = task_description
-        self.date_created = date_created
+        self.date_created = datetime.datetime.now()
         self.id_task_status = id_task_status
 
 
