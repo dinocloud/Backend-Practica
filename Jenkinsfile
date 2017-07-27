@@ -32,7 +32,7 @@ node {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
              if (${env.BRANCH_NAME}=='master')
              {
-                dockerTag = master-${env.BUILD_NUMBER}-latest
+                dockerTag = latest
              }
             sh "docker tag backend-practica dinocloud/backend-practica:$dockerTag"
             sh "docker push dinocloud/backend-practica:$dockerTag"
