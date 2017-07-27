@@ -30,8 +30,8 @@ class TasksView(FlaskView):
         except Exception as e:
             db.session.rollback()
             return 409
-        # task = Task.query.filter_by(name=tsk.task.task_name).first()
-        task_data = self.task_schema.dump(tsk).data
+        task = Task.query.filter_by(task_name=tsk.task_name).first()
+        task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data}), 201
 
 
@@ -51,6 +51,9 @@ class TasksView(FlaskView):
 
 
     def delete(self, id_task):
-        db.session.delete(Task.query.get(id_task))
-        db.session.commit()
+        try:
+            db.session.delete(Task.query.get(id_task))
+            db.session.commit()
+        except Exception as e:
+            return jsonify({'result': False})
         return jsonify({'result': True})

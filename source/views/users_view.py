@@ -51,6 +51,9 @@ class UsersView(FlaskView):
 
 
     def delete(self, id_user):
-        db.session.delete(User.query.get(id_user))
-        db.session.commit()
+        try:
+            db.session.delete(User.query.get(id_user))
+            db.session.commit()
+        except Exception as e:
+            return jsonify({'result': False})
         return jsonify({'result': True})
