@@ -2,7 +2,7 @@ from flask_classy import FlaskView
 from flask import Flask, jsonify, request
 from models import *
 from schemas import *
-from basicauth import decode
+from utils import *
 
 
 class UsersView(FlaskView):
@@ -59,16 +59,12 @@ class UsersView(FlaskView):
             return jsonify({'result': False})
         return jsonify({'result': True})
 
+
     def login(self):
-        header = request.headers
-        encoded_str = header.get({'message':'Authorization'}, None)
-        if encoded_str == None:
-            return jsonify({'message':'Authorization failed'}), 400
-        username, password = decode(encoded_str)
-        user = User.query.filter_by(username=username).first()
-        if user == None:
-            return jsonify({'message':'User not found'}), 400
-        if user.password == password:
-            return jsonify({'message':'Logged in'}), 200
-        return 401
+        data = request.headers
+        encoded_str = data.get('Authorization', None)
+        user = authorization(encoded_str)
+        user_data = self.user_schema.dump(user).data
+        return jsonify({'message':user_data})
+
 
