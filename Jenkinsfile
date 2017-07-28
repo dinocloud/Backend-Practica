@@ -12,7 +12,7 @@ node {
     stage('Build image')
     /*In this stage, docker builds the image in the path stablished.*/
     {
-        sh "/usr/bin/docker build -t backend-practica  . "
+        sh "/usr/bin/docker build -t backend-practica . "
     }
 
     stage('Test image') {
