@@ -32,7 +32,7 @@ node {
         withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')])
         {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
-             if ( env.BRANCH_NAME == 'master')
+             if ( BRANCH_NAME == 'master')
              {
                 dockerTag = "latest"
              }
