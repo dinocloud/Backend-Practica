@@ -15,7 +15,8 @@ node {
         sh "/usr/bin/docker build -t backend-practica  . "
     }
 
-    stage('Test image') {
+    stage('Test image')
+    {
          //app.inside {
         //    sh 'echo "Tests passed"'
         //}
@@ -47,5 +48,5 @@ node {
     }
 
 
-}
+
 
