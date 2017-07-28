@@ -10,6 +10,6 @@ def authorization(encoded_str):
     user = User.query.filter_by(username=username).first()
     if user is None:
         raise NotFound('User not found')
-    elif user.password is not password:
+    elif user.password != password:
         raise NotFound('Incorrect password')
     return user
