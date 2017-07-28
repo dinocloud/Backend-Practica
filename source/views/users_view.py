@@ -2,6 +2,7 @@ from flask_classy import FlaskView
 from flask import Flask, jsonify, request
 from models import *
 from schemas import *
+from utils import *
 
 
 class UsersView(FlaskView):
@@ -57,3 +58,13 @@ class UsersView(FlaskView):
         except Exception as e:
             return jsonify({'result': False})
         return jsonify({'result': True})
+
+
+    def login(self):
+        data = request.headers
+        encoded_str = data.get('Authorization', None)
+        user = authorization(encoded_str)
+        user_data = self.user_schema.dump(user).data
+        return jsonify({'message':user_data})
+
+
