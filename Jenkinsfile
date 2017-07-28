@@ -36,16 +36,12 @@ node {
              }
             sh "docker tag backend-practica dinocloud/backend-practica:$dockerTag"
             sh "docker push dinocloud/backend-practica:$dockerTag"
-
-
     }
 
      stage ('Clean local memory')
         {
             sh "docker rmi -f \$(docker images -f \"reference=dinocloud/backend-practica:$dockerTag\" -q)"
         }
-
-
     }
 
 
