@@ -2,6 +2,7 @@ from flask_classy import FlaskView
 from flask import Flask, jsonify, request
 from models import *
 from schemas import *
+# from sqlalchemy_pagination import paginate
 
 
 class TasksView(FlaskView):
@@ -9,6 +10,7 @@ class TasksView(FlaskView):
 
     def index(self):
         tasks = Task.query.all()
+        # page = Task.query.order_by(Task.paginate(1,10,False))
         tasks_data = self.task_schema.dump(tasks, many=True).data
         return jsonify({'task': tasks_data}), 200
 
