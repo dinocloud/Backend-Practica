@@ -2,7 +2,7 @@ String dockerTag = null
 
 node {
 
-    dockerTag = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+    dockerTag = (env.BRANCH_NAME == "master")? "latest" : "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
     stage('Checkout')
     {
@@ -15,7 +15,8 @@ node {
         sh "/usr/bin/docker build -t backend-practica  . "
     }
 
-    stage('Test image') {
+    stage('Test image')
+    {
          //app.inside {
         //    sh 'echo "Tests passed"'
         //}
@@ -28,20 +29,20 @@ node {
          * Second, the 'latest' tag.
          * Pushing multiple tags is cheap, as all the layers are reused. */
 
-        withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+        withCredentials([usernamePassword(credentialsId: '48253a45-d82c-43c8-b39e-031c511bc475', passwordVariable: 'DOCKER_REGISTRY_PASS', usernameVariable: 'DOCKER_REGISTRY_USER')])
+        {
             sh "docker login --username=${DOCKER_REGISTRY_USER} --password=${DOCKER_REGISTRY_PASS} "
-            sh "docker tag backend-practica dinocloud/backend-practica:$dockerTag"
-            sh "docker push dinocloud/backend-practica:$dockerTag"
+            sh "docker tag backend-practica dinocloud/backend-practica:${dockerTag}"
+            sh "docker push dinocloud/backend-practica:${dockerTag}"
         }
+    }
 
      stage ('Clean local memory')
         {
-            sh "docker rmi -f \$(docker images -f \"reference=dinocloud/backend-practica:$dockerTag\" -q)"
+            sh "docker rmi -f \$(docker images -f \"reference=dinocloud/backend-practica:${dockerTag}\" -q)"
         }
-
-
     }
 
 
-}
+
 
