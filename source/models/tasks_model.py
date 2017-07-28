@@ -3,7 +3,6 @@ from database import db
 import datetime
 
 
-
 class Task(db.Model):
     __tablename__ = 'tasks'
     id_task = db.Column(Integer, primary_key=True)
