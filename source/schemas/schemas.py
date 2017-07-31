@@ -20,3 +20,9 @@ class TaskSchema(Schema):
     task_status = fields.Nested(TaskStatusSchema())
 
 
+class PaginationSchema(Schema):
+    pages = fields.Integer()
+    prev_num = fields.Integer()
+    has_prev = fields.Boolean()
+    has_next = fields.Boolean()
+    next_num = fields.Integer()
