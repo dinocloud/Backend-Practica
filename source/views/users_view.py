@@ -1,6 +1,5 @@
 from flask_classy import FlaskView
 from flask import Flask, jsonify, request
-from models import *
 from schemas import *
 from utils import *
 

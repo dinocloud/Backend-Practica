@@ -5,8 +5,9 @@ from flask_cors import CORS
 
 app = create_app()
 
-UsersView.register(app)
-TasksView.register(app)
+prefix = '/api/v1'
+UsersView.register(app, route_prefix=prefix)
+TasksView.register(app, route_prefix=prefix)
 
 if __name__ == '__main__':
     with app.app_context():
