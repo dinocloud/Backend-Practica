@@ -29,7 +29,7 @@ class TasksView(FlaskView):
         return jsonify({'task': task_data})
 
     def post(self):
-        authorization(request.headers.get('Authorization', None))
+        user = authorization(request.headers.get('Authorization', None))
         data = request.json
         task_name = data.get('task_name', None)
         if not task_name:
@@ -42,10 +42,33 @@ class TasksView(FlaskView):
         except Exception as e:
             db.session.rollback()
             return 409
+
+        owner = TaskOwner(id_task_owner=int(user.id_user), id_task=int(tsk.id_task),
+                         id_user=int(user.id_user))
+        try:
+            db.session.add(owner)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return 409
+
+        for task_user_id in data.get('users'):
+            user_repeated = TaskOwner.query.filter_by(id_task_owner=owner.id_task_owner,
+                                              id_task=tsk.id_task, id_user=task_user_id).first()
+            task_user = TaskOwner(id_task_owner=user.id_user,
+                             id_task=tsk.id_task, id_user=task_user_id)
+
+            if user_repeated is None:
+                try:
+                    db.session.add(task_user)
+                    db.session.commit()
+                except Exception as e:
+                    db. session.rollback()
+                    return 409
+
         task = Task.query.filter_by(task_name=tsk.task_name).first()
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data}), 201
-
 
     def put(self, id_task):
         authorization(request.headers.get('Authorization', None))
@@ -71,3 +94,4 @@ class TasksView(FlaskView):
         except Exception as e:
             return jsonify({'result': False})
         return jsonify({'result': True})
+
