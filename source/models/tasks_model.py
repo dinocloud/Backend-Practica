@@ -35,8 +35,8 @@ class TaskOwner(db.Model):
     id_task_owner = db.Column(Integer, ForeignKey('users.id_user'), primary_key=True)
     id_task = db.Column(Integer, ForeignKey('tasks.id_task'), primary_key=True)
     id_user = db.Column(Integer, ForeignKey('users.id_user'), primary_key=True)
-    owner = db.relationship('User', foreign_keys=[id_task_owner], backref=db.backref('tasks owner per task'))
-    tasks = db.relationship('Task', foreign_keys=[id_task], backref=db.backref('tasks that belong to the owner'))
+    owner = db.relationship('User', foreign_keys=[id_task_owner], backref=db.backref('tasks_owner_per_task'))
+    tasks = db.relationship('Task', foreign_keys=[id_task], backref=db.backref('tasks_that_belong_to_the_owner'))
 
     def __init__(self, id_task_owner=None, id_task=None, id_user=None):
         self.id_task_owner = id_task_owner
