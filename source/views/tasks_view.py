@@ -94,9 +94,9 @@ class TasksView(FlaskView):
 
     def delete(self, id_task):
         authorization(request.headers.get('Authorization', None))
-        owners = TaskOwner.query.filter_by(id_task=id_task)
+        task_collaborators = TaskOwner.query.filter_by(id_task=id_task)
         try:
-            for owner in owners:
+            for owner in task_collaborators:
                 db.session.delete(owner)
             db.session.delete(Task.query.get(id_task))
             db.session.commit()
