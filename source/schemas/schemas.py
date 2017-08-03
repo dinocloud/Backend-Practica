@@ -26,3 +26,8 @@ class PaginationSchema(Schema):
     has_prev = fields.Boolean()
     has_next = fields.Boolean()
     next_num = fields.Integer()
+
+
+class TaskOwnerSchema(Schema):
+    owner = fields.Nested(UserSchema())
+    task = fields.Nested(TaskSchema())
