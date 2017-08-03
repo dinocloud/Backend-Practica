@@ -81,6 +81,7 @@ class TasksView(FlaskView):
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
+        task.id_task_status = data.get('id_task_status', 1)
         try:
             db.session.merge(task)
             db.session.commit()
