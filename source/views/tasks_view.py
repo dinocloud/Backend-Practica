@@ -81,6 +81,7 @@ class TasksView(FlaskView):
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
+        task.id_task_status = data.get('id_task_status', 1)
         try:
             db.session.merge(task)
             db.session.commit()
@@ -93,12 +94,17 @@ class TasksView(FlaskView):
 
     def delete(self, id_task):
         authorization(request.headers.get('Authorization', None))
+        task_collaborators = TaskOwner.query.filter_by(id_task=id_task)
         try:
-            db.session.delete(Task.query.get(id_task))
+            for owner in task_collaborators:
+                db.session.delete(owner)
+            task = Task.query.get(id_task)
+            db.session.delete(task)
             db.session.commit()
         except Exception as e:
             return jsonify({'result': False})
         return jsonify({'result': True})
+
 
     def get_task_per_user(self):
         user = authorization(request.headers.get('Authorization', None))
