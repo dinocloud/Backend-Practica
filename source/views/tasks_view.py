@@ -98,11 +98,13 @@ class TasksView(FlaskView):
         try:
             for owner in task_collaborators:
                 db.session.delete(owner)
-            db.session.delete(Task.query.get(id_task))
+            task = Task.query.get(id_task)
+            db.session.delete(task)
             db.session.commit()
         except Exception as e:
             return jsonify({'result': False})
         return jsonify({'result': True})
+
 
     def get_task_per_user(self):
         user = authorization(request.headers.get('Authorization', None))
