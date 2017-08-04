@@ -10,7 +10,7 @@ UsersView.register(app, route_prefix=prefix)
 TasksView.register(app, route_prefix=prefix)
 
 
-@application.teardown_appcontext
+@app.teardown_appcontext
 def shutdown_session(response_or_exc):
     try:
         if response_or_exc is None:
