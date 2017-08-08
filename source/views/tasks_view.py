@@ -5,7 +5,7 @@ from utils import *
 from sqlalchemy import or_
 from sqlalchemy import and_
 from datetime import datetime
-from werkzeug.exceptions import Conflict, NotFound
+from werkzeug.exceptions import Conflict, NotFound, InternalServerError
 
 
 
@@ -50,7 +50,7 @@ class TasksView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Conflict('Conflict adding task')
+            raise InternalServerError('Task not added')
 
         owner = TaskOwner(id_task_owner=int(user.id_user), id_task=int(tsk.id_task),
                          id_user=int(user.id_user))
@@ -59,7 +59,7 @@ class TasksView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Conflict('Conflict adding owner to the task')
+            raise InternalServerError('User not added')
 
         for task_user_id in data.get('users'):
             user_repeated = TaskOwner.query.filter_by(id_task_owner=owner.id_task_owner,
@@ -73,7 +73,7 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db. session.rollback()
-                    raise Conflict('Conflict adding user to the task')
+                    raise InternalServerError('User not added')
         task = Task.query.join(TaskOwner, Task.id_task == TaskOwner.id_task)\
             .filter_by(id_user=user.id_user).order_by(Task.date_created.desc()).first()
         task_data = self.task_schema.dump(task).data
@@ -106,7 +106,7 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
-                    raise Conflict('Conflict with user to be added')
+                    raise InternalServerError('User not added')
 
         if delete_collaborators is not None:
             for user_to_delete in delete_collaborators:
@@ -116,14 +116,13 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
-                    raise Conflict('Conflict with user to be deleted')
-
+                    raise InternalServerError('User not deleted')
         try:
             db.session.merge(task)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return 409
+            raise InternalServerError('Task not added')
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data})
 

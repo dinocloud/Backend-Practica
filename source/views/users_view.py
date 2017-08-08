@@ -2,7 +2,7 @@ from flask_classy import FlaskView
 from flask import jsonify, request
 from schemas import *
 from utils import *
-from werkzeug.exceptions import Conflict
+from werkzeug.exceptions import Conflict, InternalServerError
 
 
 class UsersView(FlaskView):
@@ -31,7 +31,7 @@ class UsersView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Conflict('Conflict adding user')
+            raise InternalServerError('User not added')
         user = User.query.filter_by(username=usr.username).first()
         user_data = self.user_schema.dump(user).data
         return jsonify({'user': user_data}), 201
@@ -46,7 +46,7 @@ class UsersView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise Conflict('Conflict modifying user')
+            raise InternalServerError('Password not modified')
         user_data = self.user_schema.dump(user).data
         return jsonify({'user': user_data})
 
