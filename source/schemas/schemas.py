@@ -16,6 +16,7 @@ class TaskSchema(Schema):
     task_name = fields.String()
     task_description = fields.String()
     date_created = fields.DateTime()
+    due_date = fields.DateTime()
     id_task_status = fields.Integer()
     task_status = fields.Nested(TaskStatusSchema())
 
