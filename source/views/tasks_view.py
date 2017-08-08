@@ -5,6 +5,7 @@ from schemas import *
 from utils import *
 from sqlalchemy import or_
 from sqlalchemy import and_
+from datetime import datetime
 
 
 
@@ -40,7 +41,9 @@ class TasksView(FlaskView):
         if not task_name:
             return 400
         task_description = data.get('task_description', None)
-        tsk = Task(task_name=task_name, task_description=task_description)
+        due_date = data.get('due_date', None)
+        due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
+        tsk = Task(task_name=task_name, task_description=task_description, due_date=due_date)
         try:
             db.session.add(tsk)
             db.session.commit()
@@ -70,18 +73,49 @@ class TasksView(FlaskView):
                 except Exception as e:
                     db. session.rollback()
                     return 409
-
-        task = Task.query.filter_by(task_name=tsk.task_name).first()
+        task = Task.query.join(TaskOwner, Task.id_task == TaskOwner.id_task)\
+            .filter_by(id_user=user.id_user).order_by(Task.date_created.desc()).first()
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data}), 201
 
     def put(self, id_task):
-        authorization(request.headers.get('Authorization', None))
+        logged_user = authorization(request.headers.get('Authorization', None))
         data = request.json
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
-        task.id_task_status = data.get('id_task_status', 1)
+        task.id_task_status = data.get('id_task_status',1)
+        due_date = data.get('due_date', None)#nuevo
+        task.due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
+
+        users = set(data.get('users'))# nuevo
+        task_collaborators = TaskOwner.query.filter_by(id_task=id_task).filter(
+            TaskOwner.id_task_owner != TaskOwner.id_user).with_entities(TaskOwner.id_user).all()
+        collaborators = set([collaborator[0] for collaborator in task_collaborators])#correcto?
+        add_users = users.difference(collaborators)
+        delete_collaborators = collaborators.difference(users)
+
+
+        if add_users is not None:
+            for user_to_add in add_users:
+                user = TaskOwner(id_task_owner=logged_user.id_user, id_task=id_task, id_user=user_to_add)
+                try:
+                    db.session.add(user)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    return 409
+
+        if delete_collaborators is not None:
+            for user_to_delete in delete_collaborators:
+                delete_user = TaskOwner.query.filter_by(id_task=id_task, id_user=user_to_delete).first()
+                try:
+                    db.session.delete(delete_user)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    return 409
+
         try:
             db.session.merge(task)
             db.session.commit()
