@@ -9,7 +9,7 @@ class Task(db.Model):
     task_name = db.Column(String(150), nullable=False)
     task_description = db.Column(String(300))
     date_created = db.Column(DateTime, nullable=False)
-    due_date = db.Column(DateTime, nullable=True)#correcto?
+    due_date = db.Column(DateTime, nullable=True)
     id_task_status = db.Column(Integer, ForeignKey('task_statuses.id_task_status'))
     description = db.relationship('TaskStatus', backref=db.backref('task status per task'))
 
@@ -17,7 +17,7 @@ class Task(db.Model):
         self.task_name = task_name
         self.task_description = task_description
         self.date_created = datetime.datetime.now()
-        self.due_date = due_date#Es correcto?
+        self.due_date = due_date
         self.id_task_status = id_task_status
 
 
