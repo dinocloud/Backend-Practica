@@ -1,11 +1,11 @@
 from flask_classy import FlaskView
-from flask import Flask, jsonify, request
-from models import *
+from flask import jsonify, request
 from schemas import *
 from utils import *
 from sqlalchemy import or_
 from sqlalchemy import and_
 from datetime import datetime
+from werkzeug.exceptions import Conflict, NotFound
 
 
 
@@ -39,17 +39,18 @@ class TasksView(FlaskView):
         data = request.json
         task_name = data.get('task_name', None)
         if not task_name:
-            return 400
+            raise NotFound('Task name is None')
         task_description = data.get('task_description', None)
         due_date = data.get('due_date', None)
-        due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
+        if due_date is not None:
+            due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
         tsk = Task(task_name=task_name, task_description=task_description, due_date=due_date)
         try:
             db.session.add(tsk)
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return 409
+            raise Conflict('Conflict adding task')
 
         owner = TaskOwner(id_task_owner=int(user.id_user), id_task=int(tsk.id_task),
                          id_user=int(user.id_user))
@@ -58,7 +59,7 @@ class TasksView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            return 409
+            raise Conflict('Conflict adding owner to the task')
 
         for task_user_id in data.get('users'):
             user_repeated = TaskOwner.query.filter_by(id_task_owner=owner.id_task_owner,
@@ -72,7 +73,7 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db. session.rollback()
-                    return 409
+                    raise Conflict('Conflict adding user to the task')
         task = Task.query.join(TaskOwner, Task.id_task == TaskOwner.id_task)\
             .filter_by(id_user=user.id_user).order_by(Task.date_created.desc()).first()
         task_data = self.task_schema.dump(task).data
@@ -85,16 +86,17 @@ class TasksView(FlaskView):
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
         task.id_task_status = data.get('id_task_status',1)
-        due_date = data.get('due_date', None)#nuevo
-        task.due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
+        due_date = data.get('due_date', None)
+        if due_date is not None:
+            due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
+        task.due_date = due_date
 
-        users = set(data.get('users'))# nuevo
+        users = set(data.get('users'))
         task_collaborators = TaskOwner.query.filter_by(id_task=id_task).filter(
             TaskOwner.id_task_owner != TaskOwner.id_user).with_entities(TaskOwner.id_user).all()
-        collaborators = set([collaborator[0] for collaborator in task_collaborators])#correcto?
+        collaborators = set([collaborator[0] for collaborator in task_collaborators])
         add_users = users.difference(collaborators)
         delete_collaborators = collaborators.difference(users)
-
 
         if add_users is not None:
             for user_to_add in add_users:
@@ -104,7 +106,7 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
-                    return 409
+                    raise Conflict('Conflict with user to be added')
 
         if delete_collaborators is not None:
             for user_to_delete in delete_collaborators:
@@ -114,7 +116,7 @@ class TasksView(FlaskView):
                     db.session.commit()
                 except Exception as e:
                     db.session.rollback()
-                    return 409
+                    raise Conflict('Conflict with user to be deleted')
 
         try:
             db.session.merge(task)
