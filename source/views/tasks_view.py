@@ -22,9 +22,9 @@ class TasksView(FlaskView):
 
     def index(self):
         authorization(request.headers.get('Authorization', None))
-        page = request.args.get('page', None)
-        per_page = request.args.get('per_page', None)
-        tasks = Task.query.paginate(page, per_page, error_out=False)
+        page = request.args.get('page', 1)
+        per_page = request.args.get('per_page', 200)
+        tasks = Task.query.paginate(int(page), int(per_page), error_out=False)
         tasks_data = self.pagination_schema.dump(tasks).data
         return jsonify(tasks_data), 200
 
