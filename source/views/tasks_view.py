@@ -39,7 +39,7 @@ class TasksView(FlaskView):
         data = request.json
         task_name = data.get('task_name', None)
         if not task_name:
-            raise NotFound('Task name is None')
+            raise BadRequest('Task name is None')
         task_description = data.get('task_description', None)
         due_date = data.get('due_date', None)
         if due_date is not None:
@@ -85,7 +85,7 @@ class TasksView(FlaskView):
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
-        task.id_task_status = data.get('id_task_status',1)
+        task.id_task_status = data.get('id_task_status', 1)
         due_date = data.get('due_date', None)
         if due_date is not None:
             due_date = datetime.fromtimestamp(int(due_date)).strftime('%Y-%m-%d %H:%M:%S')
@@ -122,7 +122,7 @@ class TasksView(FlaskView):
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            raise InternalServerError('Task not added')
+            raise InternalServerError('Task not modified')
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data})
 
