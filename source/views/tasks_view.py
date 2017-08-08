@@ -141,7 +141,7 @@ class TasksView(FlaskView):
         return jsonify({'result': True})
 
 
-    def get_task_per_user(self):
+    def get_tasks_per_user(self):
         user = authorization(request.headers.get('Authorization', None))
         all_tasks = TaskOwner.query.filter(or_(and_(TaskOwner.id_task_owner==user.id_user, TaskOwner.id_user==user.id_user), TaskOwner.id_user==user.id_user)).all()
         all_tasks_data = self.task_owner_schema.dump(all_tasks, many=True).data
