@@ -61,7 +61,7 @@ class UsersView(FlaskView):
 
 
     def login(self):
-        user = authorization(request.headers.get('Authorization', None))
+        user = authorization()
         user_data = self.user_schema.dump(user).data
         return jsonify({'message':user_data})
 

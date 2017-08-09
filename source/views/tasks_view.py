@@ -1,11 +1,11 @@
 from flask_classy import FlaskView
-from flask import jsonify, request
+from flask import jsonify
 from schemas import *
 from utils import *
 from sqlalchemy import or_
 from sqlalchemy import and_
 from datetime import datetime
-from werkzeug.exceptions import Conflict, NotFound, InternalServerError
+from werkzeug.exceptions import InternalServerError
 
 
 
@@ -21,7 +21,7 @@ class TasksView(FlaskView):
     pagination_schema = TasksPaginationSchema()
 
     def index(self):
-        authorization(request.headers.get('Authorization', None))
+        authorization()
         page = request.args.get('page', 1)
         per_page = request.args.get('per_page', 200)
         tasks = Task.query.paginate(int(page), int(per_page), error_out=False)
@@ -29,13 +29,13 @@ class TasksView(FlaskView):
         return jsonify(tasks_data), 200
 
     def get(self, id_task):
-        authorization(request.headers.get('Authorization', None))
+        authorization()
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data})
 
     def post(self):
-        user = authorization(request.headers.get('Authorization', None))
+        user = authorization()
         data = request.json
         task_name = data.get('task_name', None)
         if not task_name:
@@ -80,7 +80,7 @@ class TasksView(FlaskView):
         return jsonify({'task': task_data}), 201
 
     def put(self, id_task):
-        logged_user = authorization(request.headers.get('Authorization', None))
+        logged_user = authorization()
         data = request.json
         task = Task.query.filter_by(id_task=int(id_task)).first()
         task.task_name = data.get('task_name', None)
@@ -128,7 +128,7 @@ class TasksView(FlaskView):
 
 
     def delete(self, id_task):
-        authorization(request.headers.get('Authorization', None))
+        authorization()
         task_collaborators = TaskOwner.query.filter_by(id_task=id_task)
         try:
             for owner in task_collaborators:
@@ -142,7 +142,7 @@ class TasksView(FlaskView):
 
 
     def get_tasks_per_user(self):
-        user = authorization(request.headers.get('Authorization', None))
+        user = authorization()
         all_tasks = TaskOwner.query\
             .filter(or_(and_(TaskOwner.id_task_owner==user.id_user, TaskOwner.id_user==user.id_user),
                         TaskOwner.id_user==user.id_user)).all()
@@ -168,7 +168,7 @@ class TasksView(FlaskView):
 
 
     def get_users_per_task(self, id_task):
-        authorization(request.headers.get('Authorization', None))
+        authorization()
         collaborators = TaskOwner.query.filter_by(id_task=id_task)\
             .filter(TaskOwner.id_task_owner!=TaskOwner.id_user).all()
         collaborators_list = list()
