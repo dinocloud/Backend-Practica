@@ -5,7 +5,7 @@ from utils import *
 from sqlalchemy import or_
 from sqlalchemy import and_
 from datetime import datetime
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import InternalServerError, BadRequest
 
 
 
