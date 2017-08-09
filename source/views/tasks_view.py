@@ -176,4 +176,4 @@ class TasksView(FlaskView):
             users = User.query.get_or_404(collaborator.id_user)
             collaborators_list.append(users)
         collaborators_data = self.user_schema.dump(collaborators_list, many=True).data
-        return jsonify({'task_users':collaborators_data})
+        return jsonify({'users':collaborators_data})
