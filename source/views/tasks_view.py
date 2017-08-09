@@ -143,7 +143,9 @@ class TasksView(FlaskView):
 
     def get_tasks_per_user(self):
         user = authorization(request.headers.get('Authorization', None))
-        all_tasks = TaskOwner.query.filter(or_(and_(TaskOwner.id_task_owner==user.id_user, TaskOwner.id_user==user.id_user), TaskOwner.id_user==user.id_user)).all()
+        all_tasks = TaskOwner.query\
+            .filter(or_(and_(TaskOwner.id_task_owner==user.id_user, TaskOwner.id_user==user.id_user),
+                        TaskOwner.id_user==user.id_user)).all()
         all_tasks_data = self.task_owner_schema.dump(all_tasks, many=True).data
 
         for index, task in enumerate(all_tasks_data):
@@ -164,3 +166,14 @@ class TasksView(FlaskView):
         statuses_data = self.status_schema.dump(statuses, many=True).data
         return jsonify({'statuses':statuses_data})
 
+
+    def get_users_per_task(self, id_task):
+        authorization(request.headers.get('Authorization', None))
+        collaborators = TaskOwner.query.filter_by(id_task=id_task)\
+            .filter(TaskOwner.id_task_owner!=TaskOwner.id_user).all()
+        collaborators_list = list()
+        for collaborator in collaborators:
+            task_user = User.query.get(collaborator.id_user)
+            collaborators_list.append(task_user)
+        collaborators_data = self.user_schema.dump(collaborators_list, many=True).data
+        return jsonify({'task_users':collaborators_data})
