@@ -2,7 +2,7 @@ from flask_classy import FlaskView
 from flask import jsonify, request
 from schemas import *
 from utils import *
-from werkzeug.exceptions import Conflict, InternalServerError
+from werkzeug.exceptions import Conflict, InternalServerError, BadRequest
 
 
 class UsersView(FlaskView):
@@ -15,7 +15,7 @@ class UsersView(FlaskView):
 
 
     def get(self, id_user):
-        user = User.query.filter_by(id_user=int(id_user)).first()
+        user = User.query.filter(User.id_user==int(id_user)).first()
         user_data = self.user_schema.dump(user).data
         return jsonify({'user': user_data})
 
@@ -32,14 +32,14 @@ class UsersView(FlaskView):
         except Exception as e:
             db.session.rollback()
             raise InternalServerError('User not added')
-        user = User.query.filter_by(username=usr.username).first()
+        user = User.query.filter(User.username==usr.username).first()
         user_data = self.user_schema.dump(user).data
         return jsonify({'user': user_data}), 201
 
 
     def put(self, id_user):
         data = request.json
-        user = User.query.filter_by(id_user=int(id_user)).first()
+        user = User.query.filter(User.id_user==int(id_user)).first()
         user.password = data.get('password', None)
         try:
             db.session.merge(user)

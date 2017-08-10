@@ -30,7 +30,7 @@ class TasksView(FlaskView):
 
     def get(self, id_task):
         authorization()
-        task = Task.query.filter_by(id_task=int(id_task)).first()
+        task = Task.query.filter(Task.id_task==int(id_task)).first()
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data})
 
@@ -62,8 +62,8 @@ class TasksView(FlaskView):
             raise InternalServerError('User not added')
 
         for task_user_id in data.get('users'):
-            user_repeated = TaskOwner.query.filter_by(id_task_owner=owner.id_task_owner,
-                                              id_task=tsk.id_task, id_user=task_user_id).first()
+            user_repeated = TaskOwner.query.filter(and_(TaskOwner.id_task_owner==owner.id_task_owner,
+                                              TaskOwner.id_task==tsk.id_task, TaskOwner.id_user==task_user_id)).first()
             task_user = TaskOwner(id_task_owner=user.id_user,
                              id_task=tsk.id_task, id_user=task_user_id)
 
@@ -75,14 +75,14 @@ class TasksView(FlaskView):
                     db. session.rollback()
                     raise InternalServerError('User not added')
         task = Task.query.join(TaskOwner, Task.id_task == TaskOwner.id_task)\
-            .filter_by(id_user=user.id_user).order_by(Task.date_created.desc()).first()
+            .filter(TaskOwner.id_user==user.id_user).order_by(Task.date_created.desc()).first()
         task_data = self.task_schema.dump(task).data
         return jsonify({'task': task_data}), 201
 
     def put(self, id_task):
         logged_user = authorization()
         data = request.json
-        task = Task.query.filter_by(id_task=int(id_task)).first()
+        task = Task.query.filter(Task.id_task==int(id_task)).first()
         task.task_name = data.get('task_name', None)
         task.task_description = data.get('task_description', None)
         task.id_task_status = data.get('id_task_status', 1)
@@ -92,8 +92,9 @@ class TasksView(FlaskView):
         task.due_date = due_date
 
         users = set(data.get('users'))
-        task_collaborators = TaskOwner.query.filter_by(id_task=id_task).filter(
-            TaskOwner.id_task_owner != TaskOwner.id_user).with_entities(TaskOwner.id_user).all()
+        task_collaborators = TaskOwner.query.filter(and_(TaskOwner.id_task==id_task,
+                                                    TaskOwner.id_task_owner != TaskOwner.id_user)).\
+                                                    with_entities(TaskOwner.id_user).all()
         collaborators = set([collaborator[0] for collaborator in task_collaborators])
         add_users = users.difference(collaborators)
         delete_collaborators = collaborators.difference(users)
@@ -110,7 +111,7 @@ class TasksView(FlaskView):
 
         if delete_collaborators is not None:
             for user_to_delete in delete_collaborators:
-                delete_user = TaskOwner.query.filter_by(id_task=id_task, id_user=user_to_delete).first()
+                delete_user = TaskOwner.query.filter(and_(TaskOwner.id_task==id_task, TaskOwner.id_user==user_to_delete)).first()
                 try:
                     db.session.delete(delete_user)
                     db.session.commit()
@@ -129,7 +130,7 @@ class TasksView(FlaskView):
 
     def delete(self, id_task):
         authorization()
-        task_collaborators = TaskOwner.query.filter_by(id_task=id_task)
+        task_collaborators = TaskOwner.query.filter(TaskOwner.id_task==id_task)
         try:
             for owner in task_collaborators:
                 db.session.delete(owner)
@@ -150,7 +151,7 @@ class TasksView(FlaskView):
 
         for index, task in enumerate(all_tasks_data):
             task_obj = task.get('task')
-            colls = TaskOwner.query.filter_by(id_task=task_obj.get('id_task')).filter(TaskOwner.id_task_owner != TaskOwner.id_user).all()
+            colls = TaskOwner.query.filter(and_(TaskOwner.id_task==task_obj.get('id_task'), TaskOwner.id_task_owner != TaskOwner.id_user)).all()
             colls_list = list()
             for coll in colls:
                 coll_object = User.query.get(coll.id_user)
@@ -169,8 +170,7 @@ class TasksView(FlaskView):
 
     def get_users_per_task(self, id_task):
         authorization()
-        collaborators = TaskOwner.query.filter_by(id_task=id_task)\
-            .filter(TaskOwner.id_task_owner!=TaskOwner.id_user).all()
+        collaborators = TaskOwner.query.filter(and_(TaskOwner.id_task==id_task, TaskOwner.id_task_owner!=TaskOwner.id_user)).all()
         collaborators_list = list()
         for collaborator in collaborators:
             users = User.query.get_or_404(collaborator.id_user)
